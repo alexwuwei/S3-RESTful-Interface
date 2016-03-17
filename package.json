@@ -1,0 +1,35 @@
+{
+  "name": "s3-restful-interface",
+  "version": "1.0.0",
+  "description": "a restful api that interfaces with s3",
+  "main": "server.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexwuwei/S3-RESTful-Interface.git"
+  },
+  "author": "Hugo A Guerra <guerrahugoa@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/alexwuwei/S3-RESTful-Interface/issues"
+  },
+  "homepage": "https://github.com/alexwuwei/S3-RESTful-Interface#readme",
+  "devDependencies": {
+    "body-parser": "^1.15.0",
+    "chai": "^3.5.0",
+    "chai-http": "^2.0.1",
+    "gulp": "^3.9.1",
+    "gulp-eslint": "^2.0.0",
+    "mocha": "^2.4.5"
+  },
+  "dependencies": {
+    "express": "^4.13.4",
+    "mongoose": "^4.4.7"
+  }
+}
