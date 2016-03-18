@@ -1,8 +1,8 @@
 'use strict';
-let User = require(__dirname + '/../models/users-model');
-let File = require(__dirname + '/../models/files-model');
 
-module.exports = (middleRouter) => {
+module.exports = (middleRouter, models) => {
+  let User = models.User;
+  let File = models.File;
   middleRouter.route('/users')
   .get((req, res) => {
     console.log('GET route hit for /users');
