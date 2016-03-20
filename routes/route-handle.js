@@ -2,14 +2,20 @@
 var AWS = require('aws-sdk');
 AWS.config.region = 'us-west-2';
 var s3 = new AWS.S3();  //revise
-var params = {Bucket: 'user-file-bucket', Key: } //revise
+// var params = {Bucket: 'user-file-bucket', Key:  }
 var fs = require('fs');
+var bodyParser = require('body-parser');
 
 
 
 module.exports = (middleRouter, models) => {
   let User = models.User;
   let File = models.File;
+
+  middleRouter.route('/test')
+  .get((req, res) => {
+    console.log('GET TEST ROUTE HIT');
+  })
 
   middleRouter.route('/users')
   .get((req, res) => {
@@ -33,7 +39,7 @@ module.exports = (middleRouter, models) => {
     console.log('GET route hit for /users/:user');
     User.findById(req.params.id, (err, user) => {
       res.json(user);
-    })
+    });
   })
   .put((req, res) => {
     console.log('PUT route hit for /users/:user');
@@ -71,10 +77,10 @@ module.exports = (middleRouter, models) => {
       if (err) console.log(err);
       console.log('successfully sent data to s3. data is: ' + data);
     });
-    var url = s3.getSignedUrl('objectName', params, (err, url) => { //revise objectName, find actual name
+    var url = s3.getSignedUrl('getObject', params, (err, url) => { //revise objectName, find actual name
       console.log('url is ' + url); //revise, maybe put all new file and push to user in here. if so, get rid of var.
-    })
-    var newFile = new File(req.body);
+    });
+    var newFile = new File({fileName: req.body.fileName, content: req.body.content, url: url});
     newFile.save((err, file) => {
       User.findById(req.params.id, (err, user) => {
         user.files.push(file._id); //test
