@@ -72,3 +72,5 @@ module.exports = (middleRouter, models) => {
     });
   });
 }
+
+//use getSignedUrl to get a url from s3 http://docs.aws.amazon.com/AWSJavaScriptSDK/guide/node-examples.html
