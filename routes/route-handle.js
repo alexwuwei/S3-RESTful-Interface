@@ -72,6 +72,9 @@ module.exports = (middleRouter, models) => {
   .get((req, res) => {
     console.log('GET route hit for /users/:user/files');
     User.findById({_id: req.params.user}).populate('files').exec((err, user) => {
+      if(!user) {
+        res.send('user doesnt exist!!!');
+      };
       res.json({
         data: user.files
       });
