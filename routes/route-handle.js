@@ -1,7 +1,7 @@
 'use strict';
 var AWS = require('aws-sdk');
 AWS.config.region = 'us-west-2';
-var s3 = new AWS.S3();  //revise
+var s3 = new AWS.S3(); 
 var fs = require('fs');
 // var bodyParser = require('body-parser');
 
@@ -39,12 +39,27 @@ module.exports = (middleRouter, models) => {
     console.log('PUT route hit for /users/:user');
     User.findByIdAndUpdate(req.params.user, req.body, (err, user) => {
       if (err) return res.send(err);
-      res.json(customer);
+      res.json(user);
     });
   })
   .delete((req, res) => {
     console.log('DEL route hit for /users/:user');
-    User.findById(req.params.user, (err, user) => {
+    User.findById({_id: req.params.user}).populate('files').exec((err, user) => {
+      if(user.files) {
+      user.files.forEach((file) => {
+        let params = {
+          Bucket: 'user-file-bucket',
+          Key: file.fileName
+        };
+        s3.deleteObject(params, (err, data) => {
+          if (err) console.log(err);
+          console.log(data);
+        });
+        file.remove((err, file) => {
+          console.log('file ' + file + ' was removed');
+        });
+      });
+      }
       user.remove((err, user) => {
         res.json({message: 'user removed'});
       });
@@ -56,10 +71,17 @@ module.exports = (middleRouter, models) => {
   middleRouter.route('/users/:user/files')
   .get((req, res) => {
     console.log('GET route hit for /users/:user/files');
-    User.findById(req.params.user, (err, user) => {
-      res.json(user.files);
+    User.findById({_id: req.params.user}).populate('files').exec((err, user) => {
+      if(!user) {
+        res.send('user doesnt exist!!!');
+      };
+      res.json({
+        data: user.files
+      });
+      res.end();
     });
   })
+
   .post((req, res) => {
     console.log('POST route hit for /users/:user/files');
     fs.writeFile('./data/' + req.body.fileName, req.body.content, (err) => {
@@ -74,16 +96,13 @@ module.exports = (middleRouter, models) => {
       if (err) console.log(err);
       console.log('successfully sent data to s3. data is: ' + data);
     });
-    s3.getSignedUrl('getObject', {Bucket: 'user-file-bucket', Key: req.body.fileName}, (err, url) => { //revise objectName, find actual name
-      console.log('S3 url is ' + url);
+    s3.getSignedUrl('getObject', {Bucket: 'user-file-bucket', Key: req.body.fileName}, (err, url) => {
       var newFile = new File({fileName: req.body.fileName, content: req.body.content, url: url});
       newFile.save((err, file) => {
         console.log('new file created, file is ' + file);
-        console.log('in filesave, user is: ' + req.params.user);
         User.findByIdAndUpdate(req.params.user, { $push: {files: file._id}} , (err, user) => {
           console.log(file._id + ' pushed for user: ' + req.params.user);
-          // user.files.push({files: file._id}); //test
-          res.end();
+          res.json({message:'file posted successfully'});
         });
       });
     });
@@ -117,11 +136,17 @@ module.exports = (middleRouter, models) => {
   .delete((req, res) => {
     console.log('DEL route hit for /files/:file');
     File.findById(req.params.file, (err, file) => {
+      let params = {
+        Bucket: 'user-file-bucket',
+        Key: file.fileName
+      };
+      s3.deleteObject(params, (err, data) => {
+        if (err) console.log(err);
+        console.log('file: ' + data + ' was removed');
+      });
       file.remove((err, file) => {
         res.json({message: 'file removed'});
       });
     });
   });
 };
-
-//use getSignedUrl to get a url from s3 http://docs.aws.amazon.com/AWSJavaScriptSDK/guide/node-examples.html
