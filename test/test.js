@@ -1,0 +1,10 @@
+var mocha = require('mocha');
+var chai = require('chai');
+var chaiHttp = require('chai-http');
+chai.use(chaiHttp);
+var expect = chai.expect;
+var request = chai.request;
+var http = require('http');
+require('../server.js');
+var User = require('../models/users-model');
+var File = require('../models/files-model');
